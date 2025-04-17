@@ -24,7 +24,7 @@ import * as Joi from 'joi';
       }),
       envFilePath: './apps/order-service/.env',
     }),
-    RabbitMQModule.forRoot(RabbitMQModule, {
+    RabbitMQModule.forRoot({
       exchanges: [
         {
           name: 'shop.topic',

@@ -22,7 +22,7 @@ import * as Joi from 'joi';
       }),
       envFilePath: './apps/logging-service/.env',
     }),
-    RabbitMQModule.forRoot(RabbitMQModule, {
+    RabbitMQModule.forRoot({
       exchanges: [
         {
           name: 'shop.topic',

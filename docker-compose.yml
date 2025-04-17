@@ -1,17 +1,44 @@
 version: '3.9'
 
 services:
-  db:
+  order-db:
     image: postgres:latest
-    container_name: shopdb
+    container_name: order-db
     restart: always
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
+      POSTGRES_DB: order_db
     ports:
       - 5432:5432
     volumes:
-      - ./volumes/postgresdata:/var/lib/postgresql/data
+      - ./volumes/order-db:/var/lib/postgresql/data
+
+  inventory-db:
+    image: postgres:latest
+    container_name: inventory-db
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: inventory_db
+    ports:
+      - 5433:5432
+    volumes:
+      - ./volumes/inventory-db:/var/lib/postgresql/data
+
+  logging-db:
+    image: postgres:latest
+    container_name: logging-db
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: logging_db
+    ports:
+      - 5434:5432
+    volumes:
+      - ./volumes/logging-db:/var/lib/postgresql/data
 
   rabbitmq:
     image: rabbitmq:3.12-management
@@ -59,7 +86,7 @@ services:
       rabbitmq:
         condition: service_healthy
         restart: true
-      db:
+      order-db:
         condition: service_started
       inventory-service:
         condition: service_started
@@ -81,7 +108,7 @@ services:
       rabbitmq:
         condition: service_healthy
         restart: true
-      db:
+      inventory-db:
         condition: service_started
     volumes:
       - .:/usr/src/app
@@ -101,7 +128,7 @@ services:
       rabbitmq:
         condition: service_healthy
         restart: true
-      db:
+      logging-db:
         condition: service_started
     volumes:
       - .:/usr/src/app
