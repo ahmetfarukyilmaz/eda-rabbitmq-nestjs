@@ -12,6 +12,7 @@ import * as Joi from 'joi';
       validationSchema: Joi.object({
         RABBIT_MQ_URI: Joi.string().required(),
         RABBIT_MQ_INTERMEDIARY_QUEUE: Joi.string().required(),
+        APP_PORT: Joi.number().required(),
       }),
       envFilePath: './apps/intermediary-service/.env',
     }),
@@ -22,7 +23,7 @@ import * as Joi from 'joi';
           type: 'topic',
         },
       ],
-      uri: 'amqp://guest:guest@rabbitmq:5672',
+      uri: process.env.RABBIT_MQ_URI,
     }),
   ],
   controllers: [IntermediaryController],

@@ -3,8 +3,10 @@ import { InventoryServiceModule } from './inventory-service.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(InventoryServiceModule);
-  await app.listen(3002, () =>
-    console.log('Inventory Service is listening on port 3002.'),
+  await app.listen(Number(process.env.APP_PORT), () =>
+    console.log(
+      `Inventory Service is listening on port ${process.env.APP_PORT}`,
+    ),
   );
 }
 bootstrap();
