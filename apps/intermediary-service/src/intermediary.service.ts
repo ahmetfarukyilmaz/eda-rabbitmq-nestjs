@@ -1,11 +1,10 @@
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateOrderDto } from 'apps/order-service/src/dtos/create-order.dto';
+import { InventoryItem } from './interfaces/inventory.interface';
 
 @Injectable()
 export class IntermediaryService {
-  private readonly logger = new Logger(IntermediaryService.name);
-
   constructor(private readonly amqpConnection: AmqpConnection) {}
 
   async CreateOrder(orderData: CreateOrderDto): Promise<string> {
@@ -15,26 +14,26 @@ export class IntermediaryService {
         'shop.order.placed',
         orderData,
       );
-      this.logger.log(`Order successfully published.`);
       return 'Order successfully published.';
     } catch (error) {
-      this.logger.error(`Failed to publish order`);
       throw new Error(`Failed to publish order: ${error.message}`);
     }
   }
 
-  async ListInventory(): Promise<string> {
+  async ListInventory(): Promise<InventoryItem[]> {
     try {
-      await this.amqpConnection.publish(
-        'shop.topic',
-        'shop.inventory.list',
-        {},
+      const inventoryItems = await this.amqpConnection.request<InventoryItem[]>(
+        {
+          exchange: 'shop.direct',
+          routingKey: 'shop.inventory.get',
+          payload: {},
+          timeout: 10000, // 10 seconds timeout
+        },
       );
-      this.logger.log(`List inventory successfully published.`);
-      return 'List inventory successfully published.';
+
+      return inventoryItems;
     } catch (error) {
-      this.logger.error(`Failed to publish order`);
-      throw new Error(`Failed to publish order: ${error.message}`);
+      throw new Error(`Failed to retrieve inventory: ${error.message}`);
     }
   }
 }

@@ -5,7 +5,6 @@ import {
   RabbitRequest,
   RabbitSubscribe,
 } from '@golevelup/nestjs-rabbitmq';
-import { CreateEventLogDto } from './dtos/create-event-log.dto';
 import { IRabbitRequest } from '@app/common/interfaces';
 import { EventLog } from './entities/event-log.entity';
 

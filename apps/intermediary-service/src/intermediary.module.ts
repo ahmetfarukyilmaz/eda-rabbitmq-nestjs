@@ -22,6 +22,10 @@ import * as Joi from 'joi';
           name: 'shop.topic',
           type: 'topic',
         },
+        {
+          name: 'shop.direct',
+          type: 'direct',
+        },
       ],
       uri: process.env.RABBIT_MQ_URI,
     }),

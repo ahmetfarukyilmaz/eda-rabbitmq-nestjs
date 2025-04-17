@@ -46,7 +46,7 @@ export class InventoryService {
     }
   }
 
-  async listInventory(): Promise<void> {
+  async listInventory(): Promise<Inventory[]> {
     try {
       const items = await this.inventoryRepository.find({
         order: {
@@ -54,9 +54,10 @@ export class InventoryService {
         },
       });
       this.logger.log(`Inventory list: ${JSON.stringify(items)}`);
-      // Implement logic to retrieve all items from inventory and send to presentation layer via TCP/Websockets
+      return items;
     } catch (error) {
       this.logger.error(`Error retrieving items in inventory: ${error}`);
+      throw error;
     }
   }
 

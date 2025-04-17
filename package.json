@@ -22,6 +22,23 @@
     "typeorm:create-migration": "npm run typeorm -- migration:create ./migrations/$npm_config_name",
     "typeorm:run-migrations": "npm run typeorm migration:run -- -d ./type-orm.config.ts",
     "typeorm:revert-migrations": "npm run typeorm migration:revert -- -d ./type-orm.config.ts",
+    
+    "order:create-migration": "npm run typeorm -- migration:create ./apps/order-service/migrations/$npm_config_name",
+    "order:run-migrations": "npm run typeorm migration:run -- -d ./apps/order-service/typeorm.config.ts",
+    "order:revert-migrations": "npm run typeorm migration:revert -- -d ./apps/order-service/typeorm.config.ts",
+    
+    "inventory:create-migration": "npm run typeorm -- migration:create ./apps/inventory-service/migrations/$npm_config_name",
+    "inventory:run-migrations": "npm run typeorm migration:run -- -d ./apps/inventory-service/typeorm.config.ts",
+    "inventory:revert-migrations": "npm run typeorm migration:revert -- -d ./apps/inventory-service/typeorm.config.ts",
+    
+    "logging:create-migration": "npm run typeorm -- migration:create ./apps/logging-service/migrations/$npm_config_name",
+    "logging:run-migrations": "npm run typeorm migration:run -- -d ./apps/logging-service/typeorm.config.ts",
+    "logging:revert-migrations": "npm run typeorm migration:revert -- -d ./apps/logging-service/typeorm.config.ts",
+    
+    "intermediary:create-migration": "npm run typeorm -- migration:create ./apps/intermediary-service/migrations/$npm_config_name",
+    "intermediary:run-migrations": "npm run typeorm migration:run -- -d ./apps/intermediary-service/typeorm.config.ts",
+    "intermediary:revert-migrations": "npm run typeorm migration:revert -- -d ./apps/intermediary-service/typeorm.config.ts",
+    
     "start:order": "nest start order-service",
     "start:order:dev": "nest start order-service --watch",
     "start:order:prod": "node dist/apps/order-service/main",
@@ -43,9 +60,11 @@
     "@nestjs/core": "^11.0.20",
     "@nestjs/microservices": "^11.0.20",
     "@nestjs/platform-express": "^11.0.20",
+    "@nestjs/swagger": "^11.1.4",
     "@nestjs/typeorm": "^11.0.0",
     "amqp-connection-manager": "^4.1.14",
     "amqplib": "^0.10.7",
+    "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "joi": "^17.13.3",
     "pg": "^8.14.1",

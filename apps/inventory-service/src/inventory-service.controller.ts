@@ -29,13 +29,14 @@ export class InventoryServiceController {
     this.logger.log(`handleInventory(): ${routingKey}`);
     switch (routingKey) {
       case 'shop.inventory.create': {
-        // TODO: Validate payload
         this.inventoryService.createInventory(inventoryData);
         break;
       }
       case 'shop.inventory.list': {
-        // TODO: Validate payload
-        this.inventoryService.listInventory();
+        // This functionality is now handled by RPC
+        this.logger.log(
+          'Deprecation notice: Please use RPC endpoint for inventory listing',
+        );
         break;
       }
       case 'shop.inventory.update': {
@@ -71,5 +72,15 @@ export class InventoryServiceController {
     @RabbitPayload() inventoryData: Inventory[],
   ): Promise<boolean> {
     return this.inventoryService.checkInventory(inventoryData);
+  }
+
+  @RabbitRPC({
+    exchange: 'shop.direct',
+    routingKey: 'shop.inventory.get',
+    queue: 'inventory-get-rpc-queue',
+  })
+  async handleGetInventory(): Promise<Inventory[]> {
+    this.logger.log('RPC request to get inventory items');
+    return this.inventoryService.listInventory();
   }
 }
