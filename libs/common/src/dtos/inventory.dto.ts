@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class InventoryItem {
+export class InventoryItemDto {
   @ApiProperty({
     example: 1,
     description: 'The unique identifier of the inventory item',
@@ -13,21 +13,27 @@ export class InventoryItem {
   })
   product_name: string;
 
-  @ApiProperty({ example: 10, description: 'The quantity available in stock' })
+  @ApiProperty({
+    example: 10,
+    description: 'The quantity available in stock',
+  })
   quantity: number;
 
-  @ApiProperty({ example: 29.99, description: 'The price of the product' })
+  @ApiProperty({
+    example: 29.99,
+    description: 'The price of the product',
+  })
   price: number;
 
   @ApiProperty({
     example: '2023-01-01T00:00:00Z',
     description: 'The creation timestamp',
   })
-  created_at: string;
+  created_at: string | Date;
 
   @ApiProperty({
     example: '2023-01-01T00:00:00Z',
     description: 'The last update timestamp',
   })
-  updated_at: string;
+  updated_at: string | Date;
 }

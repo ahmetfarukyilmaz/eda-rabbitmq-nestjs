@@ -19,6 +19,9 @@ NOTE: This personal project was rushed as a learning/upskilling exercise and is 
   - [Migration Folders](#migration-folders)
   - [Running Migrations](#running-migrations)
   - [Database Configuration](#database-configuration)
+- [Shared DTOs](#shared-dtos)
+  - [DTO Structure](#dto-structure)
+  - [Implementation](#implementation)
 - [Usage](#usage)
 <!--te-->
 
@@ -146,4 +149,49 @@ npm run intermediary:revert-migrations
 - `apps/intermediary-service/typeorm.config.ts`
 
 These configurations point to the appropriate database and entities for each service.
+
+# Shared DTOs
+
+To maintain consistency across microservices and avoid duplication, this project implements shared Data Transfer Objects (DTOs) in the common library.
+
+## DTO Structure
+
+All shared DTOs are located in the `libs/common/src/dtos` directory:
+
+- `inventory.dto.ts` - Contains DTOs for inventory-related data
+- `order.dto.ts` - Contains DTOs for order-related data
+
+The shared DTOs include:
+
+- `InventoryItemDto` - Used for transmitting inventory data between services
+- `OrderItemDto` - Represents an individual item in an order
+- `CreateOrderDto` - Used for creating new orders
+
+## Implementation
+
+The shared DTOs approach provides several benefits:
+
+1. **Single Source of Truth**: Each DTO is defined once and used across all services
+2. **Type Safety**: Consistent interfaces across microservices
+3. **Separation of Concerns**: Database entities remain internal to their services, while DTOs are used for communication
+4. **Maintainability**: Changes to data structures only need to be made in one place
+
+In the Inventory Service, entity objects are mapped to DTOs before being sent to other services:
+
+```typescript
+private mapToDto(inventory: Inventory): InventoryItemDto {
+  const dto = new InventoryItemDto();
+  dto.id = inventory.id;
+  dto.product_name = inventory.product_name;
+  dto.quantity = inventory.quantity;
+  dto.price = inventory.price;
+  dto.created_at = inventory.created_at;
+  dto.updated_at = inventory.updated_at;
+  return dto;
+}
+```
+
+This approach ensures a clean separation between internal database entities and the public interfaces used for communication between services.
+
+# Usage
 

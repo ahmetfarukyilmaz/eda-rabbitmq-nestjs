@@ -1,18 +1,24 @@
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { Injectable } from '@nestjs/common';
-import { CreateOrderDto } from 'apps/order-service/src/dtos/create-order.dto';
-import { InventoryItem } from './interfaces/inventory.interface';
+import { CreateOrderDto, InventoryItemDto } from '@app/common';
+import { createRabbitMQHeadersWithRequestId } from '@app/common/request-id';
 
 @Injectable()
 export class IntermediaryService {
   constructor(private readonly amqpConnection: AmqpConnection) {}
 
-  async CreateOrder(orderData: CreateOrderDto): Promise<string> {
+  async CreateOrder(
+    orderData: CreateOrderDto,
+    requestId?: string,
+  ): Promise<string> {
     try {
       await this.amqpConnection.publish(
         'shop.topic',
         'shop.order.placed',
         orderData,
+        {
+          headers: createRabbitMQHeadersWithRequestId(requestId),
+        },
       );
       return 'Order successfully published.';
     } catch (error) {
@@ -20,16 +26,17 @@ export class IntermediaryService {
     }
   }
 
-  async ListInventory(): Promise<InventoryItem[]> {
+  async ListInventory(requestId?: string): Promise<InventoryItemDto[]> {
     try {
-      const inventoryItems = await this.amqpConnection.request<InventoryItem[]>(
-        {
-          exchange: 'shop.direct',
-          routingKey: 'shop.inventory.get',
-          payload: {},
-          timeout: 10000, // 10 seconds timeout
-        },
-      );
+      const inventoryItems = await this.amqpConnection.request<
+        InventoryItemDto[]
+      >({
+        exchange: 'shop.direct',
+        routingKey: 'shop.inventory.get',
+        payload: {},
+        timeout: 10000, // 10 seconds timeout
+        headers: createRabbitMQHeadersWithRequestId(requestId),
+      });
 
       return inventoryItems;
     } catch (error) {

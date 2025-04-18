@@ -25,6 +25,9 @@ export class EventLog {
   @Column('text')
   error_message: string;
 
+  @Column({ nullable: true })
+  request_id: string;
+
   @CreateDateColumn()
   created_at: Date;
 }

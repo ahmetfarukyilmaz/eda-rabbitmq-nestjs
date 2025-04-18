@@ -7,10 +7,17 @@ export interface IRabbitRequest {
     routingKey: string;
   };
   properties: {
-    headers: object;
+    headers: {
+      requestId?: string;
+      [key: string]: any;
+    };
   };
   content: {
     type: string;
     data: number[];
   };
+}
+
+export interface RequestContext {
+  requestId: string;
 }

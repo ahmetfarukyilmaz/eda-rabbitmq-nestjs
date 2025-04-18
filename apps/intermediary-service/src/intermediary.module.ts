@@ -1,9 +1,10 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { IntermediaryController } from './intermediary.controller';
 import { IntermediaryService } from './intermediary.service';
 import { ConfigModule } from '@nestjs/config';
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import * as Joi from 'joi';
+import { RequestIdMiddleware } from '@app/common/request-id';
 
 @Module({
   imports: [
@@ -33,4 +34,10 @@ import * as Joi from 'joi';
   controllers: [IntermediaryController],
   providers: [IntermediaryService],
 })
-export class IntermediaryModule {}
+export class IntermediaryModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(RequestIdMiddleware)
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
+  }
+}

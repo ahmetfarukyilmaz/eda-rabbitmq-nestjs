@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { IntermediaryModule } from './intermediary.module';
 import { ValidationPipe } from '@nestjs/common';
+import { REQUEST_ID_HEADER } from '@app/common/request-id';
 
 async function bootstrap() {
   const app = await NestFactory.create(IntermediaryModule);
@@ -19,6 +20,10 @@ async function bootstrap() {
     .setDescription('Intermediary Service API')
     .setVersion('1.0')
     .addTag('intermediary')
+    .addApiKey(
+      { type: 'apiKey', in: 'header', name: REQUEST_ID_HEADER },
+      REQUEST_ID_HEADER,
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

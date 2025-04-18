@@ -3,8 +3,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Order } from './entities/order.entity';
-import { CreateOrderDto, OrderItemDto } from './dtos/create-order.dto';
+import { CreateOrderDto, OrderItemDto } from '@app/common';
 import { OrderItem } from './entities/order-item.entity';
+import { createRabbitMQHeadersWithRequestId } from '@app/common/request-id';
 
 @Injectable()
 export class OrderService {
@@ -19,7 +20,10 @@ export class OrderService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async createOrder(orderData: CreateOrderDto): Promise<void> {
+  async createOrder(
+    orderData: CreateOrderDto,
+    requestId?: string,
+  ): Promise<void> {
     const queryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.connect();
@@ -27,6 +31,7 @@ export class OrderService {
     try {
       const stockAvailable = await this.validateStockAvailableInInventory(
         orderData,
+        requestId,
       );
 
       if (!stockAvailable) throw 'Order has items with unavailable stock.';
@@ -40,6 +45,7 @@ export class OrderService {
       order.customer_email = orderData.customer_email;
       order.total_items = calculateTotalOrderedItems(orderData.order_items);
       order.total_value = calculateTotalOrderValue(orderData.order_items);
+      order.request_id = requestId;
 
       const orderItems: OrderItem[] = orderData.order_items.map(
         (itemData: OrderItemDto) => {
@@ -67,6 +73,9 @@ export class OrderService {
         'shop.topic',
         'shop.inventory.decrement.quantity',
         orderData.order_items,
+        {
+          headers: createRabbitMQHeadersWithRequestId(requestId),
+        },
       );
     } catch (error) {
       this.logger.error(`Error creating order: ${error}`);
@@ -79,6 +88,7 @@ export class OrderService {
 
   private async validateStockAvailableInInventory(
     orderData: CreateOrderDto,
+    requestId?: string,
   ): Promise<boolean> {
     try {
       const result = await this.amqpConnection.request<boolean>({
@@ -86,6 +96,7 @@ export class OrderService {
         routingKey: 'shop.inventory.check',
         payload: orderData.order_items,
         timeout: 10000,
+        headers: createRabbitMQHeadersWithRequestId(requestId),
       });
       return result;
     } catch (error) {

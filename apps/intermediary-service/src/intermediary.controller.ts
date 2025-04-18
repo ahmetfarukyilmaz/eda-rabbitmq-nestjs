@@ -1,8 +1,8 @@
-import { Controller, Post, Body, HttpCode, Get } from '@nestjs/common';
-import { CreateOrderDto } from 'apps/order-service/src/dtos/create-order.dto';
+import { Controller, Post, Body, HttpCode, Get, Req } from '@nestjs/common';
 import { IntermediaryService } from './intermediary.service';
-import { InventoryItem } from './interfaces/inventory.interface';
+import { CreateOrderDto, InventoryItemDto } from '@app/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Request } from 'express';
 
 @ApiTags('Intermediary')
 @Controller('intermediary')
@@ -17,8 +17,14 @@ export class IntermediaryController {
     description: 'Order created successfully',
     type: String,
   })
-  async CreateOrder(@Body() orderData: CreateOrderDto): Promise<string> {
-    return this.intermediaryService.CreateOrder(orderData);
+  async CreateOrder(
+    @Body() orderData: CreateOrderDto,
+    @Req() request: Request,
+  ): Promise<string> {
+    return this.intermediaryService.CreateOrder(
+      orderData,
+      request['requestId'],
+    );
   }
 
   @Get('/inventory')
@@ -27,11 +33,13 @@ export class IntermediaryController {
   @ApiResponse({
     status: 200,
     description: 'List of all inventory items',
-    type: InventoryItem,
+    type: InventoryItemDto,
     isArray: true,
   })
-  async ListInventory(): Promise<InventoryItem[]> {
-    const inventoryData = await this.intermediaryService.ListInventory();
+  async ListInventory(@Req() request: Request): Promise<InventoryItemDto[]> {
+    const inventoryData = await this.intermediaryService.ListInventory(
+      request['requestId'],
+    );
     return inventoryData;
   }
 }

@@ -6,8 +6,9 @@ import {
   RabbitRequest,
   RabbitSubscribe,
 } from '@golevelup/nestjs-rabbitmq';
-import { IRabbitRequest } from '@app/common/interfaces';
+import { IRabbitRequest, InventoryItemDto } from '@app/common';
 import { Inventory } from './entities/inventory.entity';
+import { getRequestIdFromRabbitMQ } from '@app/common/request-id';
 
 @Controller()
 export class InventoryServiceController {
@@ -26,7 +27,11 @@ export class InventoryServiceController {
     @RabbitRequest() request: IRabbitRequest,
   ): Promise<void> {
     const routingKey = request.fields.routingKey;
-    this.logger.log(`handleInventory(): ${routingKey}`);
+    const requestId = getRequestIdFromRabbitMQ(request.properties.headers);
+    this.logger.log(
+      `handleInventory(): ${routingKey} (requestId: ${requestId})`,
+    );
+
     switch (routingKey) {
       case 'shop.inventory.create': {
         this.inventoryService.createInventory(inventoryData);
@@ -70,7 +75,10 @@ export class InventoryServiceController {
   })
   async handleCheckInventory(
     @RabbitPayload() inventoryData: Inventory[],
+    @RabbitRequest() request: IRabbitRequest,
   ): Promise<boolean> {
+    const requestId = getRequestIdFromRabbitMQ(request.properties.headers);
+    this.logger.log(`Check inventory RPC (requestId: ${requestId})`);
     return this.inventoryService.checkInventory(inventoryData);
   }
 
@@ -79,8 +87,13 @@ export class InventoryServiceController {
     routingKey: 'shop.inventory.get',
     queue: 'inventory-get-rpc-queue',
   })
-  async handleGetInventory(): Promise<Inventory[]> {
-    this.logger.log('RPC request to get inventory items');
+  async handleGetInventory(
+    @RabbitRequest() request: IRabbitRequest,
+  ): Promise<InventoryItemDto[]> {
+    const requestId = getRequestIdFromRabbitMQ(request.properties.headers);
+    this.logger.log(
+      `RPC request to get inventory items (requestId: ${requestId})`,
+    );
     return this.inventoryService.listInventory();
   }
 }

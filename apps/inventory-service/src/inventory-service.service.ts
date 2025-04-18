@@ -5,6 +5,7 @@ import { Inventory } from './entities/inventory.entity';
 import { CreateInventoryDto } from './dtos/create-inventory.dto';
 import { UpdateInventoryDto } from './dtos/update-inventory.dto';
 import { DeleteInventoryDto } from './dtos/delete-inventory.dto';
+import { InventoryItemDto } from '@app/common';
 
 @Injectable()
 export class InventoryService {
@@ -46,15 +47,27 @@ export class InventoryService {
     }
   }
 
-  async listInventory(): Promise<Inventory[]> {
+  // TODO: Move it to somewhere else
+  private mapToDto(inventory: Inventory): InventoryItemDto {
+    const dto = new InventoryItemDto();
+    dto.id = inventory.id;
+    dto.product_name = inventory.product_name;
+    dto.quantity = inventory.quantity;
+    dto.price = inventory.price;
+    dto.created_at = inventory.created_at;
+    dto.updated_at = inventory.updated_at;
+    return dto;
+  }
+
+  async listInventory(): Promise<InventoryItemDto[]> {
     try {
       const items = await this.inventoryRepository.find({
         order: {
           id: 'ASC', // 'ASC' for ascending order, 'DESC' for descending
         },
       });
-      this.logger.log(`Inventory list: ${JSON.stringify(items)}`);
-      return items;
+      this.logger.log(`Inventory list retrieved with ${items.length} items`);
+      return items.map((item) => this.mapToDto(item));
     } catch (error) {
       this.logger.error(`Error retrieving items in inventory: ${error}`);
       throw error;

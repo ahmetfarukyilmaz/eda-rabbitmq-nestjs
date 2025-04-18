@@ -1,7 +1,13 @@
 import { Controller, Logger } from '@nestjs/common';
 import { OrderService } from './order-service.service';
-import { CreateOrderDto } from './dtos/create-order.dto';
-import { RabbitPayload, RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
+import { CreateOrderDto } from '@app/common';
+import {
+  RabbitPayload,
+  RabbitSubscribe,
+  RabbitRequest,
+} from '@golevelup/nestjs-rabbitmq';
+import { IRabbitRequest } from '@app/common/interfaces';
+import { getRequestIdFromRabbitMQ } from '@app/common/request-id';
 
 @Controller()
 export class OrderServiceController {
@@ -16,7 +22,10 @@ export class OrderServiceController {
   })
   async handleOrderPlacedEvent(
     @RabbitPayload() orderData: CreateOrderDto,
+    @RabbitRequest() request: IRabbitRequest,
   ): Promise<void> {
-    await this.orderService.createOrder(orderData);
+    const requestId = getRequestIdFromRabbitMQ(request.properties.headers);
+    this.logger.log(`Processing order (requestId: ${requestId})`);
+    await this.orderService.createOrder(orderData, requestId);
   }
 }

@@ -25,6 +25,9 @@ export class Order {
   @Column({ type: 'numeric' })
   total_items: number;
 
+  @Column({ nullable: true })
+  request_id: string;
+
   @OneToMany(() => OrderItem, (orderItem) => orderItem.order, { cascade: true })
   order_items: OrderItem[];
 
